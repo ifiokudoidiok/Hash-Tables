@@ -32,7 +32,15 @@ class HashTable:
 
         OPTIONAL STRETCH: Research and implement DJB2
         '''
-        pass
+        # start from an arbitrary large prime such as (5381)
+        # set the ahs value to 5381
+        hash_value = 5381
+        # iterate over each char in the key
+        for char in key:
+            # set the hash value to the bit shift left by 5 of the hash value and sum of the hash value  then add the value for the char 
+            ((hash_value << 5) + hash_value) + ord(char) #(hash_value * 33) + ord(char)) 
+        # return the hash value
+            return hash_value
 
 
     def _hash_mod(self, key):
@@ -60,10 +68,17 @@ class HashTable:
         else:
             curr_item = self.storage[hash_value]
 
-            while curr_item.next is not None:
-                curr_item = curr_item.next
+            while curr_item:
+                if curr_item.key == key:
+                    curr_item.value = value 
+                    break
+                elif curr_item.next:
+                    curr_item = curr_item.next
+                else:
+                    break
+
             curr_item.next = LinkedPair(key, value)
-            return
+
         
 
 
@@ -76,30 +91,55 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        hash_value = self._hash_mod(key)
+        if not self.storage[hash_value]:
+            print('Key not found')
+        else:
+            curr_node = self.storage[hash_value]
+            prev_node = None
+            next_node = curr_node.next
+
+            while True:
+                if curr_node.key == key:
+                    if prev_node is None:
+                        self.storage[hash_value] = next_node
+                        break
+                    elif next_node is None and prev_node:
+                        prev_node.next = None
+                        break
+                elif curr_node.next:
+                    prev_node = curr_node
+                    curr_node = next_node
+                    next_node = curr_node.next
+                else:
+                    print('Key not found')
+                    break
+                
+
 
 
     def retrieve(self, key):
         '''
         Retrieve the value stored with the given key.
-
         Returns None if the key is not found.
-
         Fill this in.
         '''
-        # Hash the key to get the correct location
-        hash_value = self._hash_mod(key)
-        # Check there is something stored at this index, if not, return None
-        if self.storage[hash_value] is None:
-            return None
-        else:
-        # set the temporary variable to be the first item in the linked list at the correct index
-        # Loop through checking if the current key matches the key provided
-        # if so, return the value
-        # once we reach the end of the chain, check the last value to see if it matches
-        # if it does, return the value
-        # if not, return None
-        pass
+        # get the position in the array
+        position = self._hash_mod(key)
+
+        # get the node at the current position
+        current_node = self.storage[position]
+
+        # Tranverse the linked list
+        while current_node:
+            # compare the key of the node in the linked list with the hashed key
+            if current_node.key == key:
+                # return the value of the current node
+                return current_node.value
+            # move on to the next node
+            current_node = current_node.next
+        return None
+        
 
 
     def resize(self):
@@ -109,23 +149,17 @@ class HashTable:
 
         Fill this in.
         '''
-        self.capacity *= 2
-        new_storage = [None] * self.capacity
+        
+        new_storage = HashTable(self.capacity * 2)
         for i in range(self.capacity):
-            new_storage[i] = self.storage[i]
-        self.storage = new_storage
+            current_node = self.storage[i]
+            while current_node:
+                new_storage.insert(current_node.key, current_node.value)
+                current_node = current_node.next
+        self.storage = new_storage.storage
+        self.capacity = new_storage.capacity
 
-print('Hash Dammy:')
-print(hash('dammy') % 6)
 
-ht = HashTable(2)
-
-ht.insert("line_1", "Tiny hash table")
-ht.insert("line_2", "Filled beyond capacity")
-ht.insert("line_3", "Linked list saves the day!")
-print('------------------')
-print(ht)
-print('------------------')
 
 if __name__ == "__main__":
     ht = HashTable(7)
